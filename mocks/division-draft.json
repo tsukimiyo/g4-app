@@ -1,0 +1,80 @@
+{
+  "draft": {
+    "id": "c5a99058-80d4-4c9d-9479-f7a561602e8e",
+    "projectId": "3cdb9088-9609-42ce-9cf4-79ec0f165d50",
+    "version": 1,
+    "source": "txt",
+    "importId": "2e28b238-da5d-4eda-96c7-308780404703",
+    "status": "draft",
+    "tasks": [
+      {
+        "key": "t_feedback",
+        "taskId": null,
+        "title": "整理教授 feedback",
+        "assignees": [{ "memberId": "b66cbb79-635a-49b4-b4cf-c5fb413f0909", "part": null }],
+        "deadline": "2026-12-04",
+        "deadlineText": "這週五前",
+        "evidence": [1],
+        "confidence": "high",
+        "reportEveryDays": null,
+        "reportTime": "21:00"
+      },
+      {
+        "key": "t_flow",
+        "taskId": null,
+        "title": "修改流程圖",
+        "assignees": [{ "memberId": "b2020328-3f36-4b0c-9923-6956cd08c403", "part": null }],
+        "deadline": "2026-12-07",
+        "deadlineText": "下週一前",
+        "evidence": [2],
+        "confidence": "high",
+        "reportEveryDays": null,
+        "reportTime": "21:00"
+      },
+      {
+        "key": "t_proto",
+        "taskId": null,
+        "title": "prototype 畫面",
+        "assignees": [
+          { "memberId": "ebad9ce6-b1a4-411e-984b-10d34800cd4b", "part": "開工和回報那幾頁先做" }
+        ],
+        "deadline": "2026-12-10",
+        "deadlineText": "12/10 前",
+        "evidence": [3],
+        "confidence": "high",
+        "reportEveryDays": null,
+        "reportTime": "21:00"
+      },
+      {
+        "key": "t_text",
+        "taskId": null,
+        "title": "說明文字",
+        "assignees": [{ "memberId": "0704a9ee-bd14-4878-90d9-2b55503fe97f", "part": null }],
+        "deadline": "2026-12-10",
+        "deadlineText": "12/10 前",
+        "evidence": [4, 5],
+        "confidence": "high",
+        "reportEveryDays": null,
+        "reportTime": "21:00"
+      },
+      {
+        "key": "t_video",
+        "taskId": null,
+        "title": "錄 demo 影片",
+        "assignees": [],
+        "deadline": null,
+        "deadlineText": null,
+        "evidence": [6, 7, 8],
+        "confidence": "low",
+        "reportEveryDays": null,
+        "reportTime": "21:00"
+      }
+    ],
+    "openQuestions": ["影片誰錄沒有結論"]
+  },
+  "warnings": [
+    { "code": "MEMBER_NO_TASK", "memberId": "5667038f-9679-4a77-a1e6-c1021623c879" },
+    { "code": "TASK_NO_ASSIGNEE", "taskKey": "t_video" },
+    { "code": "DEADLINE_MISSING", "taskKey": "t_video" }
+  ]
+}

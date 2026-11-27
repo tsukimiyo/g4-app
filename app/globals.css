@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/*
+ * 設計 token。B 依 prototype 調整色碼，其他人一律用這些名稱（bg-warn、text-ink-muted…），
+ * 不要在元件裡直接寫 #hex，之後改色才不用全專案搜尋。
+ */
+@theme {
+  --color-surface: #ffffff;
+  --color-surface-muted: #f5f5f4;
+  --color-ink: #1c1917;
+  --color-ink-muted: #78716c;
+  --color-line: #e7e5e4;
+  --color-brand: #2563eb;
+
+  /* 事件等級：需要協調（橘）、Agent 介入（紅）、討論後的分工變更（黃） */
+  --color-warn: #f97316;
+  --color-warn-soft: #ffedd5;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fee2e2;
+  --color-changed: #facc15;
+  --color-ok: #16a34a;
+
+  --font-sans: "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+}

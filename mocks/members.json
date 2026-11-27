@@ -1,0 +1,11 @@
+{
+  "projectId": "3cdb9088-9609-42ce-9cf4-79ec0f165d50",
+  "finalDeadline": "2026-12-20",
+  "members": [
+    { "id": "b66cbb79-635a-49b4-b4cf-c5fb413f0909", "displayName": "品妤", "color": "#ef4444" },
+    { "id": "b2020328-3f36-4b0c-9923-6956cd08c403", "displayName": "柏翰", "color": "#3b82f6" },
+    { "id": "ebad9ce6-b1a4-411e-984b-10d34800cd4b", "displayName": "詩涵", "color": "#22c55e" },
+    { "id": "0704a9ee-bd14-4878-90d9-2b55503fe97f", "displayName": "育誠", "color": "#a855f7" },
+    { "id": "5667038f-9679-4a77-a1e6-c1021623c879", "displayName": "冠廷", "color": "#f59e0b" }
+  ]
+}

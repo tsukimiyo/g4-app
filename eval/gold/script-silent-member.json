@@ -1,0 +1,43 @@
+{
+  "transcript": "script-silent-member.txt",
+  "members": ["品妤", "柏翰", "詩涵", "育誠", "冠廷"],
+  "finalDeadline": "2026-12-20",
+  "tasks": [
+    {
+      "title": "整理教授 feedback",
+      "keywords": ["feedback", "回饋"],
+      "owners": ["品妤"],
+      "deadline": "2026-12-04",
+      "evidence": [1]
+    },
+    {
+      "title": "修改流程圖",
+      "keywords": ["流程圖"],
+      "owners": ["柏翰"],
+      "deadline": "2026-12-07",
+      "evidence": [2]
+    },
+    {
+      "title": "prototype 畫面",
+      "keywords": ["prototype", "畫面"],
+      "owners": ["詩涵"],
+      "deadline": "2026-12-10",
+      "evidence": [3]
+    },
+    {
+      "title": "說明文字",
+      "keywords": ["說明"],
+      "owners": ["育誠"],
+      "deadline": "2026-12-10",
+      "evidence": [4, 5]
+    },
+    {
+      "title": "錄 demo 影片",
+      "keywords": ["影片"],
+      "owners": [],
+      "deadline": null,
+      "evidence": [6, 7, 8]
+    }
+  ],
+  "unassignedMembers": ["冠廷"]
+}

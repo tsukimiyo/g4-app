@@ -1,0 +1,19 @@
+-- 第 4 組劇本的測試資料。owner：C
+--
+-- 注意：members.user_id 參照 auth.users，所以 seed 要先有測試帳號。建議做法：
+--   1. 本機 `pnpm supabase start` 後，在 Studio（http://localhost:54323）→ Authentication 建 5 個測試帳號
+--      （或用 magic link 各登入一次）
+--   2. 把下面的 <user-id-*> 換成那 5 個帳號的 id
+--   3. `pnpm supabase db reset` 會重跑所有 migration 與這份 seed
+--
+-- insert into projects (id, course, team_name, title, member_count, final_deadline, created_by)
+-- values ('3cdb9088-9609-42ce-9cf4-79ec0f165d50', '多媒體', '第 4 組', '期末專題', 5, '2026-12-20', '<user-id-1>');
+--
+-- insert into members (id, project_id, user_id, display_name, color) values
+--   ('b66cbb79-635a-49b4-b4cf-c5fb413f0909', '3cdb9088-9609-42ce-9cf4-79ec0f165d50', '<user-id-1>', '品妤', '#ef4444'),
+--   ('b2020328-3f36-4b0c-9923-6956cd08c403', '3cdb9088-9609-42ce-9cf4-79ec0f165d50', '<user-id-2>', '柏翰', '#3b82f6'),
+--   ('ebad9ce6-b1a4-411e-984b-10d34800cd4b', '3cdb9088-9609-42ce-9cf4-79ec0f165d50', '<user-id-3>', '詩涵', '#22c55e'),
+--   ('0704a9ee-bd14-4878-90d9-2b55503fe97f', '3cdb9088-9609-42ce-9cf4-79ec0f165d50', '<user-id-4>', '育誠', '#a855f7'),
+--   ('5667038f-9679-4a77-a1e6-c1021623c879', '3cdb9088-9609-42ce-9cf4-79ec0f165d50', '<user-id-5>', '冠廷', '#f59e0b');
+--
+-- （id 與 mocks/members.json 相同，前端 mock 與真實資料可以直接對照）

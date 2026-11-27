@@ -1,0 +1,10 @@
+# 統一用 LF 換行，避免 Windows / macOS 混用時整份檔案都變成 diff、產生假衝突
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+
+# lockfile 不要手動合併：衝突時重跑 pnpm install（見 CONTRIBUTING.md）
+pnpm-lock.yaml merge=binary -diff

@@ -1,0 +1,49 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# build / test output
+build/
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+
+# env（金鑰絕對不能 commit，只 commit .env.example）
+.env
+.env*.local
+.env.development
+.env.production
+
+# supabase local
+supabase/.branches/
+supabase/.temp/
+
+# eval 輸出（LLM 回應快取與報告；demo 快取另外放 eval/cache-demo/ 並 commit）
+eval/out/
+
+# os / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# 只用 pnpm，避免出現其他 lockfile
+package-lock.json
+yarn.lock
+
+# AI agent 的個人設定
+.claude/settings.local.json
