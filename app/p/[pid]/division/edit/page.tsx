@@ -2,110 +2,29 @@
 
 // 分工調整頁。owner：A（W1）
 // 11/28：使用 Mock JSON 完成分工調整功能。
+// 11/28：整合 D 的正式 validateDivision()。
 // 11/29：串接正式草稿讀取、自動儲存及送出 API。
 
 import { useState } from "react";
 
 import { DivisionEditor } from "@/components/division/DivisionEditor";
 
-import { DraftWithWarnings, type DivisionWarning, type DraftTask } from "@/lib/schemas/division";
+import { DraftWithWarnings, type DraftTask } from "@/lib/schemas/division";
+
+// 使用團隊共用的正式驗證函數。
+import { validateDivision } from "@/lib/rules/validate-division";
+
+// 使用團隊共用的台灣日期函數。
+import { todayInTaipei } from "@/lib/time";
 
 import mockDraftJson from "@/mocks/division-draft.json";
 import mockMembersJson from "@/mocks/members.json";
 
-// 使用共用 Zod Schema 驗證 Mock JSON，
-// 避免直接使用型別斷言掩蓋資料格式問題。
+// 使用共用 Zod Schema 驗證 Mock JSON。
 const initialData = DraftWithWarnings.parse(mockDraftJson);
 
 const members = mockMembersJson.members;
 const finalDeadline = mockMembersJson.finalDeadline;
-
-// 取得台灣當地日期，格式為 YYYY-MM-DD。
-// 正式整合時可改用團隊共用的 todayInTaipei()。
-function getTodayInTaipei(): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Taipei",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-}
-
-// MOCK ONLY：暫時的前端驗證函數。
-// D 的 validateDivision() 完成後，應移除此函數，
-// 改用正式共用驗證函數。
-function validateMockDivision(tasks: DraftTask[], today: string): DivisionWarning[] {
-  const warnings: DivisionWarning[] = [];
-
-  // 1. MEMBER_NO_TASK
-  // 檢查是否有組員尚未分配到任何任務。
-  for (const member of members) {
-    const hasTask = tasks.some((task) =>
-      task.assignees.some((assignee) => assignee.memberId === member.id),
-    );
-
-    if (!hasTask) {
-      warnings.push({
-        code: "MEMBER_NO_TASK",
-        memberId: member.id,
-      });
-    }
-  }
-
-  // 預先計算任務名稱出現次數。
-  const titleCounts = new Map<string, number>();
-
-  for (const task of tasks) {
-    const title = task.title.trim();
-
-    titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1);
-  }
-
-  // 檢查每一項任務。
-  for (const task of tasks) {
-    // 2. TASK_NO_ASSIGNEE
-    if (task.assignees.length === 0) {
-      warnings.push({
-        code: "TASK_NO_ASSIGNEE",
-        taskKey: task.key,
-      });
-    }
-
-    // 3. DEADLINE_MISSING
-    if (task.deadline === null) {
-      warnings.push({
-        code: "DEADLINE_MISSING",
-        taskKey: task.key,
-      });
-    } else {
-      // 4. DEADLINE_PAST
-      if (task.deadline < today) {
-        warnings.push({
-          code: "DEADLINE_PAST",
-          taskKey: task.key,
-        });
-      }
-
-      // 5. DEADLINE_AFTER_FINAL
-      if (task.deadline > finalDeadline) {
-        warnings.push({
-          code: "DEADLINE_AFTER_FINAL",
-          taskKey: task.key,
-        });
-      }
-    }
-
-    // 6. DUPLICATE_TITLE
-    if ((titleCounts.get(task.title.trim()) ?? 0) > 1) {
-      warnings.push({
-        code: "DUPLICATE_TITLE",
-        taskKey: task.key,
-      });
-    }
-  }
-
-  return warnings;
-}
 
 export default function Page() {
   // 任務資料的唯一狀態來源。
@@ -114,11 +33,22 @@ export default function Page() {
   // Mock 送出確認狀態。
   const [submitted, setSubmitted] = useState(false);
 
-  const [today] = useState(getTodayInTaipei);
+  // 用於重設 DivisionEditor 的內部暫存狀態。
+  const [resetVersion, setResetVersion] = useState(0);
 
+  // 使用團隊共用函數取得台灣當地日期。
+  const today = todayInTaipei();
+
+  // 使用 D 完成的正式驗證函數。
   // 每次任務資料改變時重新計算警告。
-  const warnings = validateMockDivision(tasks, today);
+  const warnings = validateDivision({
+    tasks,
+    members,
+    finalDeadline,
+    today,
+  });
 
+  // 所有警告都處理完成後才允許送出。
   const canSubmit = tasks.length > 0 && members.length > 0 && warnings.length === 0;
 
   // 更新任務資料。
@@ -132,13 +62,30 @@ export default function Page() {
   function handleSubmit() {
     if (!canSubmit || submitted) return;
 
+    // 送出時再次取得當下的台灣日期並驗證，
+    // 避免頁面長時間開啟後跨日造成驗證錯誤。
+    const latestWarnings = validateDivision({
+      tasks,
+      members,
+      finalDeadline,
+      today: todayInTaipei(),
+    });
+
+    if (latestWarnings.length > 0) {
+      setTasks([...tasks]);
+      return;
+    }
+
     setSubmitted(true);
   }
 
-  // 將頁面恢復成初始 Mock 資料，方便反覆測試。
+  // 將頁面恢復成初始 Mock 資料。
   function handleReset() {
     setTasks(initialData.draft.tasks);
     setSubmitted(false);
+
+    // 同時清除選人、新增任務及刪除權限的暫存狀態。
+    setResetVersion((previous) => previous + 1);
   }
 
   return (
@@ -189,6 +136,7 @@ export default function Page() {
 
       {/* 分工核心元件 */}
       <DivisionEditor
+        key={resetVersion}
         tasks={tasks}
         members={members}
         warnings={warnings}
@@ -254,6 +202,8 @@ export default function Page() {
         <p className="text-xs leading-relaxed text-ink-muted">
           目前使用本機 Mock JSON，不需要 API Key。 重新整理頁面會恢復初始資料。
         </p>
+
+        <p className="text-xs text-ink-muted">驗證方式：正式共用 validateDivision()</p>
 
         <p className="text-xs text-ink-muted">
           任務：{tasks.length} 項 · 組員：{members.length} 位 · 警告：{warnings.length} 則
