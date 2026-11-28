@@ -69,8 +69,12 @@ export function CoverageBar({ members }: CoverageBarProps) {
                 ✓
               </span>
             ) : (
-              <span className="rounded bg-warn-soft px-1 py-0.5 text-center text-[10px] font-medium text-ink">
-                尚無工作
+              <span
+                className="text-xs font-medium text-red-600"
+                aria-label="尚無工作"
+                title="尚無工作"
+              >
+                ✕
               </span>
             )}
           </li>

@@ -141,7 +141,7 @@ export function AssigneePicker({ value, members, onChange }: AssigneePickerProps
                     className="block text-xs text-ink-muted"
                     htmlFor={`assignee-part-${member.id}`}
                   >
-                    {member.displayName} 負責的部分（選填）
+                    {member.displayName} 負責
                   </label>
 
                   <input
@@ -149,7 +149,7 @@ export function AssigneePicker({ value, members, onChange }: AssigneePickerProps
                     type="text"
                     maxLength={40}
                     value={selectedAssignee.part ?? ""}
-                    placeholder="例如：負責剪輯與字幕"
+                    placeholder="(選填)"
                     onChange={(event) => updatePart(member.id, event.target.value)}
                     className={[
                       "w-full rounded-lg",
@@ -179,7 +179,7 @@ export function AssigneePicker({ value, members, onChange }: AssigneePickerProps
         </p>
 
         <p className="text-xs leading-relaxed text-ink-muted">
-          可選擇多位負責人，點擊已選擇的組員可取消指派。 多人負責時，可以填寫各自負責的部分。
+          多人負責時，可以填寫各自負責的部分。
         </p>
       </div>
     </section>

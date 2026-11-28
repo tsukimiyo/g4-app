@@ -47,13 +47,13 @@ function warningText(
 
   switch (warning.code) {
     case "MEMBER_NO_TASK":
-      return `${memberName} 還沒有分配到工作`;
+      return `${memberName} 尚無工作`;
 
     case "TASK_NO_ASSIGNEE":
-      return `「${taskName}」還沒有負責人`;
+      return `「${taskName}」無負責人`;
 
     case "DEADLINE_MISSING":
-      return `「${taskName}」還沒有截止日`;
+      return `「${taskName}」未設截止日`;
 
     case "DEADLINE_PAST":
       return `「${taskName}」的截止日已過`;
@@ -251,7 +251,7 @@ export function DivisionEditor({
         <div role="status" className="space-y-2 rounded-xl border border-warn bg-warn-soft p-3">
           <p className="flex items-center gap-2 text-sm font-semibold text-ink">
             <span aria-hidden="true">⚠</span>
-            分工還不完整
+            分工不完整
           </p>
 
           <ul className="space-y-1 text-sm text-ink">
@@ -491,7 +491,7 @@ export function DivisionEditor({
                 {/* 只有使用者新增的任務可以刪除 */}
                 {canDelete && (
                   <div className="flex items-center justify-between gap-2 border-t border-dashed border-line pt-2">
-                    <span className="text-xs text-ink-muted">手動新增的任務</span>
+                    <span className="text-xs text-ink-muted"></span>
 
                     <button
                       type="button"
@@ -547,7 +547,7 @@ export function DivisionEditor({
               type="text"
               maxLength={40}
               value={newTask.title}
-              placeholder="例如：錄 demo 影片"
+              placeholder="請輸入"
               onChange={(event) =>
                 setNewTask({
                   ...newTask,
