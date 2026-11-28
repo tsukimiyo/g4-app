@@ -18,8 +18,41 @@ export type ValidateDivisionInput = {
  * - DEADLINE_PAST：deadline < today（taskKey）
  * - DEADLINE_AFTER_FINAL：deadline > finalDeadline（taskKey）
  * - DUPLICATE_TITLE：標題去掉前後空白後相同（每個重複的 taskKey 各一則）
+ *
+ * 順序固定（前端可直接照順序顯示）：先依組員順序列 MEMBER_NO_TASK，
+ * 再依任務順序，每個任務內依上面列出的順序。
+ * YYYY-MM-DD 可以直接用字串比大小。
  */
-export function validateDivision(_input: ValidateDivisionInput): DivisionWarning[] {
-  // TODO(D)
-  throw new Error("validateDivision 尚未實作");
+export function validateDivision({
+  tasks,
+  members,
+  finalDeadline,
+  today,
+}: ValidateDivisionInput): DivisionWarning[] {
+  const warnings: DivisionWarning[] = [];
+
+  const assigned = new Set(tasks.flatMap((t) => t.assignees.map((a) => a.memberId)));
+  for (const m of members) {
+    if (!assigned.has(m.id)) warnings.push({ code: "MEMBER_NO_TASK", memberId: m.id });
+  }
+
+  const titleCount = new Map<string, number>();
+  for (const t of tasks) {
+    const title = t.title.trim();
+    titleCount.set(title, (titleCount.get(title) ?? 0) + 1);
+  }
+
+  for (const t of tasks) {
+    const taskKey = t.key;
+    if (t.assignees.length === 0) warnings.push({ code: "TASK_NO_ASSIGNEE", taskKey });
+    if (t.deadline === null) {
+      warnings.push({ code: "DEADLINE_MISSING", taskKey });
+    } else {
+      if (t.deadline < today) warnings.push({ code: "DEADLINE_PAST", taskKey });
+      if (t.deadline > finalDeadline) warnings.push({ code: "DEADLINE_AFTER_FINAL", taskKey });
+    }
+    if (titleCount.get(t.title.trim())! > 1) warnings.push({ code: "DUPLICATE_TITLE", taskKey });
+  }
+
+  return warnings;
 }
