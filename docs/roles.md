@@ -97,7 +97,7 @@ flowchart LR
 
 **12/1 前完成**
 
-- [ ] 選來源頁（上傳 .txt、手動分配入口、格式說明與範例檔下載連結 `/samples/transcript-example.txt`）
+- [ ] 選來源頁（上傳 .txt、手動分配入口、格式說明與範例檔下載連結 `/samples/transcript-example.txt`）。說明文字要寫「可以直接上傳 LINE 聊天記錄匯出檔」（見 `docs/spec-changes.md` #21）
 - [ ] 發言者對應頁（含補討論日期）
 - [ ] 分工調整：警告、未指派選人（沒工作的人標出）、改截止日、新增任務、多人負責
 - [ ] 全組確認頁：確認／提出修改、重新整理後看到人數
@@ -154,7 +154,7 @@ flowchart LR
 
 ## D｜後端（逐字稿與規則）
 
-**負責**：.txt parser、發言者配對、`validateDivision`、`suggestFrequency`、imports／speakers／extract API、單元測試。
+**負責**：.txt parser（LINE 匯出、標準格式）、發言者配對、`validateDivision`、`suggestFrequency`、imports／speakers／extract API、單元測試。
 
 **第一天從這裡開始**
 

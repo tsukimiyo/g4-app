@@ -47,8 +47,8 @@ flowchart LR
 
 | # | 步驟 | 做什麼 | 用什麼實作 |
 | --- | --- | --- | --- |
-| 1 | 選來源 | 兩條路：A 匯入討論逐字稿（只接受 .txt，格式見「Week 1 共用規格」）；B 手動分配。最後都進同一個分工調整畫面 | 前端 `division/import` 頁（.txt 檔案選擇＋手動分配入口）；`POST /api/projects/:pid/imports`；非 .txt 直接拒絕，檔案上限 2 MB |
-| 2 | 解析與正規化 | 轉成 TranscriptMessage 陣列（編號、時間、發言者、內容）；合併跨行、略過空行；時間補零成 HH:MM；格式不符時回報行號；討論日期取自檔案第一行，沒寫就在發言者對應頁請上傳者選 | `lib/transcript/` 一個 .txt parser（TypeScript＋regex），只解析一種標準格式（一行一句「時間 名字：內容」），全部是純函式、可以單元測試；不用 AI |
+| 1 | 選來源 | 兩條路：A 匯入討論逐字稿（.txt：LINE 聊天記錄匯出檔，或標準格式，自動判斷；格式見「Week 1 共用規格」）；B 手動分配。最後都進同一個分工調整畫面 | 前端 `division/import` 頁（.txt 檔案選擇＋手動分配入口）；`POST /api/projects/:pid/imports`；非 .txt 直接拒絕，檔案上限 2 MB |
+| 2 | 解析與正規化 | 轉成 TranscriptMessage 陣列（編號、時間、發言者、內容）；合併跨行、略過空行；時間補零成 HH:MM；格式不符時回報行號；討論日期取自檔案第一行，沒寫就在發言者對應頁請上傳者選 | `lib/transcript/` 的 .txt parser（TypeScript＋regex），自動判斷 LINE 匯出檔或標準格式（一行一句「時間 名字：內容」），全部是純函式、可以單元測試；不用 AI。LINE 檔的討論日期取最後一則訊息的日期 |
 | 3 | 發言者對應 | 逐字稿裡的名字不一定等於 app 內名字（暱稱、只寫姓），先自動配對，再請匯入的人確認；非組員（例如助教）標為忽略 | 完全相同 → 包含 → 編輯距離配對；`division/speakers` 頁；結果存 `speaker_aliases`，下次匯入直接套用 |
 | 4 | AI 抽取分工草稿 | 讀編號後的訊息，輸出任務、負責人、截止日與依據訊息編號 | Claude API（`claude-sonnet-5-5`）＋structured outputs（`output_config.format`）強制 JSON；以 zod 定義 schema，程式端再嚴格驗證一次；超過約 30k tokens 時依時段切塊，先各自抽取再合併（map-reduce） |
 | 5 | 規則檢查 | 有組員沒分到工作、有任務沒有負責人、截止日缺少／已過／晚於最終截止日、任務重複 → 橘色警告，不能送出 | `lib/rules/validate-division.ts`，前後端共用同一份程式；不用 AI |
@@ -97,8 +97,8 @@ Agent 在畫面上說的話（「我讀了 11/16 的討論逐字稿（86 句）�
 
 | 項目 | 12/1 demo 前（11/28–11/30） | demo 後補上（12/2–12/6） |
 | --- | --- | --- |
-| 來源 | 匯入 .txt（標準格式）＋手動分配 | 上傳頁的範例檔下載、格式錯誤的逐行提示 |
-| 解析 | 不切塊（demo 逐字稿控制在 200 句以內） | 長逐字稿切塊與合併（map-reduce） |
+| 來源 | 匯入 .txt（LINE 匯出、標準格式）＋手動分配 | 上傳頁的範例檔下載、格式錯誤的逐行提示 |
+| 解析 | 不切塊；超過 300 句只取最後面的 300 句並告訴使用者（demo 逐字稿控制在 200 句以內） | 長逐字稿切塊與合併（map-reduce） |
 | 發言者對應 | 自動配對＋一頁確認 | 存進 `speaker_aliases`，下次匯入直接套用 |
 | AI 抽取 | Sonnet＋JSON schema＋依據編號＋硬規則 | 依 eval 結果調整 prompt |
 | 規則檢查與分工調整 | 完整：警告、未指派、改日期、多人負責 | 展開「依據」看原始訊息 |
@@ -120,7 +120,12 @@ Agent 在畫面上說的話（「我讀了 11/16 的討論逐字稿（86 句）�
 
 ### 1. 逐字稿 .txt 格式
 
-只接受一種格式。上傳頁提供這份範例下載，組員用會議逐字稿或聊天內容整理成這個樣子即可。
+接受兩種格式，parser 依第一行自動判斷（變更紀錄見 `docs/spec-changes.md` #21–#23）：
+
+- **LINE 聊天記錄匯出檔**（第一行是 `[LINE] …`）：直接上傳，不用修改。貼圖、照片、檔案、通話紀錄、系統訊息自動略過，多行訊息自動合併；討論日期取最後一則訊息的日期。規則寫在 `lib/transcript/parse-line.ts`
+- **標準格式**：其他來源（會議逐字稿、手動整理的紀錄）整理成下面的樣子。上傳頁提供這份範例下載
+- 兩種格式都一樣：超過 300 句時只取最後面的 300 句（`MAX_MESSAGES`），上傳 API 要告訴使用者略過了幾句
+- Teams 等會議工具的逐字稿（有標發言者）：Week 2 拿到真實樣本後再支援
 
 ```
 # 2026-11-16 第 4 組期末專題分工
@@ -588,7 +593,7 @@ Week 1 的逐字稿抽取不需要 RAG，整段討論直接送進 LLM（過長�
 | A｜前端（分工與回報） | `division/` 五個頁面、`DivisionEditor`、`AssigneePicker`、警告橫幅；先對 mock JSON 開發 | 回報頁與 `ProgressSlider`、檢查卡、重新回報、求助表單 | 期末摘要、提出調整、自評與組員評語、交出二選一 |
 | B｜前端（框架、事件、聊天） | 沿用 prototype 樣式的元件庫、登入、建專題、邀請／QR code、首頁進度與分工表、PWA 殼 | 事件頁（橘／紅、倒數、我來協調、方案卡）、群組聊天室與討論串、推播訂閱 | 貢獻一覽、助教查看頁（徽章、詳細紀錄）、PDF 版面 |
 | C｜後端（資料與 API） | GitHub、Supabase、Vercel 建置；★ 資料表與 RLS；projects、invites、drafts、confirm API；Realtime 確認人數 | checkins、reviews、help-requests、events API；聊天室資料表與 RLS；分工新版本流程 | contributions 彙整、summaries／adjustments／evaluations API、助教簽章連結 |
-| D｜後端（逐字稿與規則） | .txt parser（標準格式）、發言者配對、`validate-division`、`suggestFrequency`、imports API；Vitest 單元測試 | pg\_cron 排程、事件狀態機、`pickReviewer`、Web Push 與 Email、測試模式 | 寄信給助教、PDF 產生、Playwright 情境測試、壓縮時間跑全流程 |
+| D｜後端（逐字稿與規則） | .txt parser（LINE 匯出、標準格式）、發言者配對、`validate-division`、`suggestFrequency`、imports API；Vitest 單元測試 | pg\_cron 排程、事件狀態機、`pickReviewer`、Web Push 與 Email、測試模式 | 寄信給助教、PDF 產生、Playwright 情境測試、壓縮時間跑全流程 |
 | E｜Agent／AI | ★ extract-division prompt、zod schema、切塊與合併；5 份測試逐字稿＋人工標註；`run-eval.ts` | 疑問改寫、協調方案、討論 → 分工變更；embedding 與 pgvector | 期末摘要（含檢索）、備援模板、使用者測試（3–5 位同學）記錄整理 |
 
 ### Week 1 每日計畫
@@ -608,7 +613,7 @@ Core 在 12/1（二）demo，只剩 4 天，所以 Week 1 拆成兩段：11/28�
 
 | 風險 | 影響 | 備案 |
 | --- | --- | --- |
-| 組員整理的 .txt 不符合格式 | parser 解析失敗，Core 當天 demo 不起來 | 上傳頁附格式說明與範例檔；格式不符時指出第幾行；仍失敗就改走手動分配 |
+| 組員整理的 .txt 不符合格式 | parser 解析失敗，Core 當天 demo 不起來 | LINE 匯出檔可直接上傳；上傳頁附格式說明與範例檔；格式不符時指出第幾行；仍失敗就改走手動分配 |
 | LLM 沒結論卻亂填負責人 | 組員被指派了沒答應的工作，失去信任 | prompt 硬規則＋每項任務必附依據訊息編號；eval 以「亂填次數 = 0」為門檻；依據可在畫面上展開檢查 |
 | 逐字稿太長或 LLM 遲延 | 等超過 30 秒，使用者放棄 | 建議只放分工討論那一段；超過上限就切塊平行抽取；畫面顯示「已讀 86 句，整理中」的進度 |
 | 中文相對日期換算錯誤 | 截止日差一週 | 保留 `deadlineText` 原文並顯示在日期旁；規則層標出已過或晚於最終截止日的日期 |
